@@ -1,0 +1,76 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GrassFormation test to create a complete Greengrass Stack
+Parameters:
+  GroupNameParameter:
+    Type: String
+    Description: "Name of the Greengrass Group"
+  CSRParameter:
+    Type: String
+    Description: "The Certificate Signing Request for the Core certificate"
+  GrassFormationGroupLambda:
+    Type: String
+    Description: "The ARN of lambda function responsible for creating GrassFormationGroup CloudFormation custom resources."
+  GrassFormationCoreLambda:
+    Type: String
+    Description: "The ARN of lambda function responsible for creating GrassFormationCore CloudFormation custom resources."
+
+Resources:
+
+  CoreCert:
+    Type: AWS::IoT::Certificate
+    Properties:
+      CertificateSigningRequest: !Ref CSRParameter
+      Status: ACTIVE
+
+  CoreThing:
+    Type: AWS::IoT::Thing
+    Properties:
+      ThingName: !Join ["_", [!Ref GroupNameParameter, "Core"]]
+
+  CoreCertCoreThingAttachment:
+    Type: AWS::IoT::ThingPrincipalAttachment
+    Properties:
+      Principal: !GetAtt CoreCert.Arn
+      ThingName: !Ref CoreThing
+
+  CorePolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyName: !Join ["_", [!Ref GroupNameParameter, "Policy"]]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: ["iot:Publish", "iot:Subscribe", "iot:Connect", "iot:Receive"]
+          Resource: "*"
+        - Effect: Allow
+          Action: ["iot:GetThingShadow", "iot:UpdateThingShadow", "iot:DeleteThingShadow"]
+          Resource: "*"
+        - Effect: Allow
+          Action: ["greengrass:*"]
+          Resource: "*"
+
+  CoreCertCorePolicyAttachment:
+    Type: AWS::IoT::PolicyPrincipalAttachment
+    Properties:
+      Principal: !GetAtt CoreCert.Arn
+      PolicyName: !Ref CorePolicy
+
+  CoreDefinition:
+    Type: Custom::GrassFormationCore
+    Properties:
+      ServiceToken: !Ref GrassFormationCoreLambda
+      Name: !Join ["_", [!Ref GroupNameParameter, "Core"]]
+      Cores:
+      - CertificateArn: !GetAtt CoreCert.Arn
+        Id: !Ref CoreThing
+        SyncShadow: true
+        ThingArn: !Join ["", ["arn:", !Ref "AWS::Partition", ":iot:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":thing/", !Ref CoreThing]]
+
+  GreengrassGroup:
+    Type: Custom::GrassFormationGroup
+    Properties:
+      ServiceToken: !Ref GrassFormationGroupLambda
+      Name: !Ref GroupNameParameter
+      CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn

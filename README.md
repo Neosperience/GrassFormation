@@ -4,7 +4,7 @@ GrassFormation is a collection of AWS lambda functions that allows you to deploy
 
 ## Installing
 
-Deploy the two lambda functions with [serverless](https://serverless.com/framework/docs/) framework. Note the Amazon Resources Names (ARNs) of the two functions. You can find them on the [AWS Lambda management console](https://console.aws.amazon.com/lambda/home).
+Deploy the CloudFormation custom resource handler lambda functions with [serverless](https://serverless.com/framework/docs/) framework.
 
 Now you can start writing CloudFormation stacks that deploy Greengrass resources. An example template is provided in the `test/fullgrass.yaml` file.
 
@@ -20,10 +20,9 @@ Pick up `test/fullgrass.yaml` and head to the [CloudFormation management console
 -----END CERTIFICATE REQUEST-----
 ```
 
- - `GFGroupLambda`: The ARN of lambda function responsible for creating `GrassFormation::Group` CloudFormation custom resources. You created this lambda function in the Installation step.
- - `GFCoreLambda`: The ARN of lambda function responsible for creating `GrassFormation::Core` CloudFormation custom resources. You created this lambda function in the Installation step.
- - `GFResourceLambda`: The ARN of lambda function responsible for creating `GrassFormation::Resource` CloudFormation custom resources. You created this lambda function in the Installation step.
  - `GroupNameParameter`: The name of the Greengrass Group.
+ - `CoreShadowHandlerARN`: The ARN of the lambda function that will handle the Core Shadow updates.
+ - `GFStackName`: The name of the CloudFormation stack that deployed the custom resource handler lambda functions during installation. For example if you used the `dev` stage and did not modify the stack name in `serverless.yml` then the value of this parameter will be `grassformation-dev`.
 
 ## Deleting the sample CloudFormation stack
 

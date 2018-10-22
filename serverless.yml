@@ -3,25 +3,53 @@ service: grassformation
 provider:
   name: aws
   runtime: python3.6
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
+  stage: dev
+  region: us-east-1
   iamRoleStatements:
    - Effect: "Allow"
      Action:
        - "greengrass:*"
      Resource: "*"
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+
 functions:
-  group:
+  GroupHandler:
     handler: grassformation.group.handler
-  core:
+  CoreHandler:
     handler: grassformation.core.handler
-  resource:
+  ResourceHandler:
     handler: grassformation.resource.handler
-  logger:
+  LoggerHandler:
     handler: grassformation.logger.handler
-  subscription:
+  SubscriptionHandler:
     handler: grassformation.subscription.handler
+
+resources:
+  Outputs:
+    GroupHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Group resources.
+      Value: { "Fn::GetAtt": ["GroupHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-GroupHandlerLambdaFunctionArn"
+    CoreHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Core resources.
+      Value: { "Fn::GetAtt": ["CoreHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-CoreHandlerLambdaFunctionArn"
+    ResourceHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Resource resources.
+      Value: { "Fn::GetAtt": ["ResourceHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-ResourceHandlerLambdaFunctionArn"
+    LoggerHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Logger resources.
+      Value: { "Fn::GetAtt": ["LoggerHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-LoggerHandlerLambdaFunctionArn"
+    SubscriptionHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Subscription resources.
+      Value: { "Fn::GetAtt": ["SubscriptionHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-SubscriptionHandlerLambdaFunctionArn"

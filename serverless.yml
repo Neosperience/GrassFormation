@@ -16,8 +16,8 @@ provider:
 
 functions:
   group:
-    handler: group.handler
+    handler: grassformation.group.handler
   core:
-    handler: core.handler
+    handler: grassformation.core.handler
   resource:
-    handler: resource.handler
+    handler: grassformation.resource.handler

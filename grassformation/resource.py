@@ -1,6 +1,12 @@
-import crhelper
+# grassformation/resource.py
+
+''' Defines the lambda function for managing CloudFormation custom resource of
+AWS Greengrass ResourceDefinition. '''
+
 import botocore
-from utils import change_requires_update, filter_dictionary, val_to_bool, keypath_replace
+from grassformation.utils import crhelper
+from grassformation.utils import keypath
+from grassformation.utils import change_requires_update, filter_dictionary, val_to_bool
 
 # initialise logger
 logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})
@@ -20,11 +26,11 @@ version_attributes = ['Resources']
 
 def clean_resource(resource):
     res = resource
-    res = keypath_replace(res,
+    res = keypath.replace(res,
                           'ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner',
                           lambda e: val_to_bool(e),
                           inline=False)
-    res = keypath_replace(res,
+    res = keypath.replace(res,
                           'ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.AutoAddGroupOwner',
                           lambda e: val_to_bool(e),
                           inline=False)

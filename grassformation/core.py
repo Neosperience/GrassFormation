@@ -1,5 +1,11 @@
-import crhelper
-from utils import change_requires_update, filter_dictionary
+# grassformation/group.py
+
+''' Defines the lambda function for managing CloudFormation custom resource of
+AWS Greengrass Core. '''
+
+from grassformation.utils import crhelper
+from grassformation.utils import keypath
+from grassformation.utils import change_requires_update, filter_dictionary, val_to_bool
 
 # initialise logger
 logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})
@@ -15,23 +21,22 @@ except Exception as e:
     logger.error(e, exc_info=True)
     init_failed = e
 
-version_attributes = [
-    'CoreDefinitionVersionArn',
-    'DeviceDefinitionVersionArn',
-    'FunctionDefinitionVersionArn',
-    'LoggerDefinitionVersionArn',
-    'ResourceDefinitionVersionArn',
-    'SubscriptionDefinitionVersionArn'
-]
+version_attributes = ['Cores']
+
+def clean_core(core):
+    return keypath.replace(core, 'SyncShadow', lambda e: val_to_bool(e), inline=False)
+
+def clean_core_defs(core_defs):
+    return {'Cores' : [clean_core(core) for core in core_defs['Cores']]}
 
 def create(event, context):
     params = {}
     params['Name'] = event['ResourceProperties']['Name']
     initial_version = filter_dictionary(event['ResourceProperties'], version_attributes)
     if initial_version:
-        logger.info('Group InitialVersion detected')
-        params['InitialVersion'] = initial_version
-    response = greengrass_client.create_group(**params)
+        logger.info('Core InitialVersion detected')
+        params['InitialVersion'] = clean_core_defs(initial_version)
+    response = greengrass_client.create_core_definition(**params)
     response.pop('ResponseMetadata', None)
     physical_resource_id = response['Id']
     return physical_resource_id, response
@@ -44,10 +49,11 @@ def update(event, context):
                                                   event['OldResourceProperties'],
                                                   event['ResourceProperties'])
     if requires_new_version:
-        logger.info('Group requires new version')
+        logger.info('Core requires new version')
         params = filter_dictionary(event['ResourceProperties'], version_attributes)
-        params['GroupId'] = physical_resource_id
-        version_response = greengrass_client.create_group_version(**params)
+        params['Cores'] = clean_core_defs(params)['Cores']
+        params['CoreDefinitionId'] = physical_resource_id
+        version_response = greengrass_client.create_core_definition_version(**params)
         version_response.pop('ResponseMetadata', None)
         response['Version'] = version_response
 
@@ -56,12 +62,12 @@ def update(event, context):
                                              event['OldResourceProperties'],
                                              event['ResourceProperties'])
     if requires_rename:
-        logger.info('Group is renamed')
+        logger.info('Core is renamed')
         params = {
-            'GroupId': physical_resource_id,
+            'CoreDefinitionId': physical_resource_id,
             'Name': event['ResourceProperties']['Name']
         }
-        greengrass_client.update_group(**params)
+        greengrass_client.update_core_definition(**params)
 
     return physical_resource_id, response
 
@@ -70,9 +76,15 @@ def delete(event, context):
     if physical_resource_id == 'NONE':
         # This is a rollback from a failed create.  Nothing to do.
         return
-
-    greengrass_client.delete_group(GroupId=physical_resource_id)
+    try:
+        greengrass_client.delete_core_definition(CoreDefinitionId=physical_resource_id)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'IdNotFoundException':
+            logger.warning('Requested to delete non existing resource.')
+        else:
+            raise e
     return
+
 
 def handler(event, context):
     # update the logger with event info

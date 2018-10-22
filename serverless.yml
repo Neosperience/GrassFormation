@@ -23,3 +23,5 @@ functions:
     handler: grassformation.resource.handler
   logger:
     handler: grassformation.logger.handler
+  subscription:
+    handler: grassformation.subscription.handler

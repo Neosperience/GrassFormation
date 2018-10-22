@@ -5,6 +5,9 @@ Parameters:
   GroupNameParameter:
     Type: String
     Description: "Name of the Greengrass Group"
+  CoreShadowHandlerARN:
+    Type: String
+    Description: "The ARN of the lambda function that should handle the Core Shadow"
   CSRParameter:
     Type: String
     Description: "The Certificate Signing Request for the Core certificate"
@@ -13,13 +16,16 @@ Parameters:
     Description: "The ARN of lambda function responsible for creating GrassFormationGroup CloudFormation custom resources."
   GFLambdaCore:
     Type: String
-    Description: "The ARN of lambda function responsible for creating GrassFormationCoreDefinition CloudFormation custom resources."
+    Description: "The ARN of lambda function responsible for creating GrassFormation CoreDefinition CloudFormation custom resources."
   GFLambdaResource:
     Type: String
-    Description: "The ARN of lambda function responsible for creating GrassFormationResourceDefinition CloudFormation custom resources."
+    Description: "The ARN of lambda function responsible for creating GrassFormation ResourceDefinition CloudFormation custom resources."
   GFLambdaLogger:
     Type: String
-    Description: "The ARN of lambda function responsible for creating GrassFormationLoggerDefinition CloudFormation custom resources."
+    Description: "The ARN of lambda function responsible for creating GrassFormation LoggerDefinition CloudFormation custom resources."
+  GFLambdaSubscription:
+    Type: String
+    Description: "The ARN of lambda function responsible for creating GrassFormation SubscriptionDefinition CloudFormation custom resources."
 
 Resources:
 
@@ -114,7 +120,7 @@ Resources:
     Type: Custom::GrassFormationLoggerDefinition
     Properties:
       ServiceToken: !Ref GFLambdaLogger
-      Name: !Join ["_", [!Ref GroupNameParameter, "Logger"]]
+      Name: !Join ["_", [!Ref GroupNameParameter, "Loggers"]]
       Loggers:
       - Type: FileSystem
         Component: GreengrassSystem
@@ -131,6 +137,17 @@ Resources:
         Level: WARN
         Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "AWSCloudWatch", "Lambda"]]
 
+  SubscriptionDefinition:
+    Type: Custom::GrassFormationSubscriptionDefinition
+    Properties:
+      ServiceToken: !Ref GFLambdaSubscription
+      Name: !Join ["_", [!Ref GroupNameParameter, "Subscriptions"]]
+      Subscriptions:
+        - Id: !Join ["_", [!Ref GroupNameParameter, "Subscription", "Shadow", "Lambda"]]
+          Source: GGShadowService
+          Target: !Ref CoreShadowHandlerARN
+          Subject: !Join ["/", ["$aws/things", !Ref CoreThing, "shadow/update/delta"]]
+
   GreengrassGroup:
     Type: Custom::GrassFormationGroup
     Properties:
@@ -139,3 +156,4 @@ Resources:
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
       ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
       LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn
+      SubscriptionDefinitionVersionArn: !GetAtt SubscriptionDefinition.LatestVersionArn

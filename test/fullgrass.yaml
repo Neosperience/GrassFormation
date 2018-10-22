@@ -8,15 +8,18 @@ Parameters:
   CSRParameter:
     Type: String
     Description: "The Certificate Signing Request for the Core certificate"
-  GFGroupLambda:
+  GFLambdaGroup:
     Type: String
     Description: "The ARN of lambda function responsible for creating GrassFormationGroup CloudFormation custom resources."
-  GFCoreLambda:
+  GFLambdaCore:
     Type: String
-    Description: "The ARN of lambda function responsible for creating GrassFormationCore CloudFormation custom resources."
-  GFResourceLambda:
+    Description: "The ARN of lambda function responsible for creating GrassFormationCoreDefinition CloudFormation custom resources."
+  GFLambdaResource:
     Type: String
-    Description: "The ARN of lambda function responsible for creating GrassFormationResource CloudFormation custom resources."
+    Description: "The ARN of lambda function responsible for creating GrassFormationResourceDefinition CloudFormation custom resources."
+  GFLambdaLogger:
+    Type: String
+    Description: "The ARN of lambda function responsible for creating GrassFormationLoggerDefinition CloudFormation custom resources."
 
 Resources:
 
@@ -61,9 +64,9 @@ Resources:
       PolicyName: !Ref CorePolicy
 
   CoreDefinition:
-    Type: Custom::GrassFormationCore
+    Type: Custom::GrassFormationCoreDefinition
     Properties:
-      ServiceToken: !Ref GFCoreLambda
+      ServiceToken: !Ref GFLambdaCore
       Name: !Join ["_", [!Ref GroupNameParameter, "Core"]]
       Cores:
       - CertificateArn: !GetAtt CoreCert.Arn
@@ -72,9 +75,9 @@ Resources:
         ThingArn: !Join ["", ["arn:", !Ref "AWS::Partition", ":iot:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":thing/", !Ref CoreThing]]
 
   ResourceDefinition:
-    Type: Custom::GrassFormationResource
+    Type: Custom::GrassFormationResourceDefinition
     Properties:
-      ServiceToken: !Ref GFResourceLambda
+      ServiceToken: !Ref GFLambdaResource
       Name: !Join ["_", [!Ref GroupNameParameter, "Resources"]]
       Resources:
       - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
@@ -107,10 +110,32 @@ Resources:
             SourcePath: "/home/pi/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build/downloads/local/lib"
             DestinationPath: "/kvs/local/lib"
 
+  LoggerDefinition:
+    Type: Custom::GrassFormationLoggerDefinition
+    Properties:
+      ServiceToken: !Ref GFLambdaLogger
+      Name: !Join ["_", [!Ref GroupNameParameter, "Logger"]]
+      Loggers:
+      - Type: FileSystem
+        Component: GreengrassSystem
+        Level: INFO
+        Space: 25600
+        Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "FileSystem", "GreengrassSystem"]]
+      - Type: FileSystem
+        Component: Lambda
+        Level: WARN
+        Space: 25600
+        Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "FileSystem", "Lambda"]]
+      - Type: AWSCloudWatch
+        Component: Lambda
+        Level: WARN
+        Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "AWSCloudWatch", "Lambda"]]
+
   GreengrassGroup:
     Type: Custom::GrassFormationGroup
     Properties:
-      ServiceToken: !Ref GFGroupLambda
+      ServiceToken: !Ref GFLambdaGroup
       Name: !Ref GroupNameParameter
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
       ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
+      LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn

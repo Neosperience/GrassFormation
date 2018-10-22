@@ -21,3 +21,5 @@ functions:
     handler: grassformation.core.handler
   resource:
     handler: grassformation.resource.handler
+  logger:
+    handler: grassformation.logger.handler

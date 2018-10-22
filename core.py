@@ -1,5 +1,5 @@
 import crhelper
-from utils import change_requires_update, filter_dictionary, val_to_bool
+from utils import change_requires_update, filter_dictionary, val_to_bool, keypath_replace
 
 # initialise logger
 logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})
@@ -18,9 +18,7 @@ except Exception as e:
 version_attributes = ['Cores']
 
 def clean_core(core):
-    if 'SyncShadow' in core:
-        core['SyncShadow'] = val_to_bool(core['SyncShadow'])
-    return core
+    return keypath_replace(core, 'SyncShadow', lambda e: val_to_bool(e), inline=False)
 
 def clean_core_defs(core_defs):
     return {'Cores' : [clean_core(core) for core in core_defs['Cores']]}

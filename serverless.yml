@@ -19,3 +19,5 @@ functions:
     handler: group.handler
   core:
     handler: core.handler
+  resource:
+    handler: resource.handler

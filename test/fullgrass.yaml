@@ -8,12 +8,15 @@ Parameters:
   CSRParameter:
     Type: String
     Description: "The Certificate Signing Request for the Core certificate"
-  GrassFormationGroupLambda:
+  GFGroupLambda:
     Type: String
     Description: "The ARN of lambda function responsible for creating GrassFormationGroup CloudFormation custom resources."
-  GrassFormationCoreLambda:
+  GFCoreLambda:
     Type: String
     Description: "The ARN of lambda function responsible for creating GrassFormationCore CloudFormation custom resources."
+  GFResourceLambda:
+    Type: String
+    Description: "The ARN of lambda function responsible for creating GrassFormationResource CloudFormation custom resources."
 
 Resources:
 
@@ -60,7 +63,7 @@ Resources:
   CoreDefinition:
     Type: Custom::GrassFormationCore
     Properties:
-      ServiceToken: !Ref GrassFormationCoreLambda
+      ServiceToken: !Ref GFCoreLambda
       Name: !Join ["_", [!Ref GroupNameParameter, "Core"]]
       Cores:
       - CertificateArn: !GetAtt CoreCert.Arn
@@ -68,9 +71,46 @@ Resources:
         SyncShadow: true
         ThingArn: !Join ["", ["arn:", !Ref "AWS::Partition", ":iot:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":thing/", !Ref CoreThing]]
 
+  ResourceDefinition:
+    Type: Custom::GrassFormationResource
+    Properties:
+      ServiceToken: !Ref GFResourceLambda
+      Name: !Join ["_", [!Ref GroupNameParameter, "Resources"]]
+      Resources:
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
+        Name: "videoDevice"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+            SourcePath: "/dev/video0"
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreInterface"]]
+        Name: "videoCoreInterface"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+            SourcePath: "/dev/vchiq"
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreSharedMemory"]]
+        Name: "videoCoreSharedMemory"
+        ResourceDataContainer:
+          LocalDeviceResourceData:
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+            SourcePath: "/dev/vcsm"
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "GStreamerKVSPlugingPath"]]
+        Name: "GStreamerKVSPlugingPath"
+        ResourceDataContainer:
+          LocalVolumeResourceData:
+            GroupOwnerSetting:
+              AutoAddGroupOwner: true
+            SourcePath: "/home/pi/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build/downloads/local/lib"
+            DestinationPath: "/kvs/local/lib"
+
   GreengrassGroup:
     Type: Custom::GrassFormationGroup
     Properties:
-      ServiceToken: !Ref GrassFormationGroupLambda
+      ServiceToken: !Ref GFGroupLambda
       Name: !Ref GroupNameParameter
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
+      ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn

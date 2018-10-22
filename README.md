@@ -20,8 +20,9 @@ Pick up `test/fullgrass.yaml` and head to the [CloudFormation management console
 -----END CERTIFICATE REQUEST-----
 ```
 
- - `GrassFormationGroupLambda`: The ARN of lambda function responsible for creating `GrassFormation::Group` CloudFormation custom resources. You created this lambda function in the Installation step.
- - `GrassFormationCoreLambda`: The ARN of lambda function responsible for creating `GrassFormation::Core` CloudFormation custom resources. You created this lambda function in the Installation step.
+ - `GFGroupLambda`: The ARN of lambda function responsible for creating `GrassFormation::Group` CloudFormation custom resources. You created this lambda function in the Installation step.
+ - `GFCoreLambda`: The ARN of lambda function responsible for creating `GrassFormation::Core` CloudFormation custom resources. You created this lambda function in the Installation step.
+ - `GFResourceLambda`: The ARN of lambda function responsible for creating `GrassFormation::Resource` CloudFormation custom resources. You created this lambda function in the Installation step.
  - `GroupNameParameter`: The name of the Greengrass Group.
 
 ## Deleting the sample CloudFormation stack
@@ -36,19 +37,25 @@ Now you can delete the deployed stack.
 
 ## Supported parameters
 
-Both custom resource lambdas, Group and Core pass most of their attributes to the appropriate AWS Greengrass API ([CreateGroup](https://docs.aws.amazon.com/Greengrass/latest/apireference/creategroup-post.html) and [CreateCoreDefinition](https://docs.aws.amazon.com/Greengrass/latest/apireference/createcoredefinition-post.html)). However both function abstract away the concept of [GroupVersion](https://docs.aws.amazon.com/Greengrass/latest/apireference/creategroupversion-post.html) and [CoreDefinitionVersion](https://docs.aws.amazon.com/Greengrass/latest/apireference/createcoredefinitionversion-post.html) by simply creating a new version of the entity when you `UPDATE` your CloudFormation stack. The attributes of the main entity (currently only `Name` for both entities) and those ones of the appropriate version entity are merged. Bearing this in mind you can find a list of the supported attributes below.
+All custom resource lambdas pass most of their attributes to the appropriate AWS Greengrass API. However all functions abstract away the concept of "resource version" of Greengrass. Whenever you update your CloudFormation stack with GreenFormation, a new version of the updated entity will be automatically created. The attributes of the main entity (currently only `Name` for both entities) and those ones of the appropriate version entity are merged. Bearing this in mind you can find a list of the supported attributes below.
 
 ### GrassFormationGroup
 
 Supported attributes:
  - `Name` (string): The name of the Greengrass Group
- - `CoreDefinitionVersionArn`, `DeviceDefinitionVersionArn`, `FunctionDefinitionVersionArn`, `SubscriptionDefinitionVersionArn`, `LoggerDefinitionVersionArn`, `ResourceDefinitionVersionArn`: check [Greengrass CreateGroupVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/creategroupversion-post.html) for more info.
+ - `CoreDefinitionVersionArn`, `DeviceDefinitionVersionArn`, `FunctionDefinitionVersionArn`, `SubscriptionDefinitionVersionArn`, `LoggerDefinitionVersionArn`, `ResourceDefinitionVersionArn`: see [Greengrass CreateGroupVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/creategroupversion-post.html) for more info.
 
 ### GrassFormationCore
 
 Supported attributes:
  - `Name` (string): The name of the Greengrass Core
- - `Cores`: check [Greengrass CreateCoreDefinitionVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/createcoredefinitionversion-post.html) for more info.
+ - `Cores`: see [Greengrass CreateCoreDefinitionVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/createcoredefinitionversion-post.html) for more info.
+
+### GrassFormationResource
+
+Supported attributes:
+ - `Name` (string): The name of the Greengrass Resources definition
+ - `Resources`: see [Greengrass CreateResourceDefinitionVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/createresourcedefinitionversion-post.html) for more info.
 
 ## Returned values
 

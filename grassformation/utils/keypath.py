@@ -55,7 +55,7 @@ def search(obj, keypath, container=False, raise_keyerror=False):
                 else:
                     return prev if container else None
         else:
-            raise ValueError('Unknown object type')
+            raise ValueError('Can not get object at keypath "{}" from json-like object: Unknown object type.'.format(keypath))
     return prev if container else current
 
 def replace(obj, keypath, repl, inline=True):

@@ -15,6 +15,9 @@ Parameters:
     Type: String
     Description: "The name of the CloudFormation stack that deployed the GrassFormation lambda handlers"
     Default: grassformation-dev
+  IoTLambdaARN:
+    Type: String
+    Description: "The fully qualified ARN of the lambda function that should be deployed on the core"
 
 Resources:
 
@@ -141,6 +144,38 @@ Resources:
           Target: !Ref CoreShadowHandlerARN
           Subject: !Join ["/", ["$aws/things", !Ref CoreThing, "shadow/update/delta"]]
 
+  FunctionDefinition:
+    Type: Custom::GrassFormationFunctionDefinition
+    Properties:
+      ServiceToken:
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, FunctionHandlerLambdaFunctionArn]]
+      Name: !Join ["_", [!Ref GroupNameParameter, "Functions"]]
+      Functions:
+        - FunctionArn: !Ref IoTLambdaARN
+          FunctionConfiguration:
+            EncodingType: json
+            Environment:
+              AccessSysfs: false
+              ResourceAccessPolicies:
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
+                  Permission: rw
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreSharedMemory"]]
+                  Permission: rw
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreInterface"]]
+                  Permission: rw
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "GStreamerKVSPlugingPath"]]
+                  Permission: ro
+              Variables:
+                AWS_DEFAULT_REGION: !Ref "AWS::Region"
+                KVS_NAME: janos-raspberry-pi-stream
+                GST_PLUGIN_PATH: "/kvs/local/lib"
+                LD_LIBRARY_PATH: "/kvs/local/lib"
+            Executable: lambda.handler
+            MemorySize: 131072
+            Pinned: true
+            Timeout: 30
+          Id: !Join ["_", [!Ref GroupNameParameter, "Function", "nsp-instore-streamer-dev-iot-runner"]]
+
   GreengrassGroup:
     Type: Custom::GrassFormationGroup
     Properties:
@@ -151,3 +186,4 @@ Resources:
       ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
       LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn
       SubscriptionDefinitionVersionArn: !GetAtt SubscriptionDefinition.LatestVersionArn
+      FunctionDefinitionVersionArn: !GetAtt FunctionDefinition.LatestVersionArn

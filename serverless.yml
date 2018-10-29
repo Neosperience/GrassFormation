@@ -25,6 +25,8 @@ functions:
     handler: grassformation.logger.handler
   SubscriptionHandler:
     handler: grassformation.subscription.handler
+  FunctionHandler:
+    handler: grassformation.function.handler
 
 resources:
   Outputs:
@@ -53,3 +55,8 @@ resources:
       Value: { "Fn::GetAtt": ["SubscriptionHandlerLambdaFunction", "Arn" ] }
       Export:
         Name: "${self:service}-${self:custom.stage}-SubscriptionHandlerLambdaFunctionArn"
+    FunctionHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Function resources.
+      Value: { "Fn::GetAtt": ["FunctionHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-FunctionHandlerLambdaFunctionArn"

@@ -39,7 +39,6 @@ def clean_resource(resource):
 def clean_resource_defs(resource_defs):
     return {'Resources' : [clean_resource(res) for res in resource_defs['Resources']]}
 
-
 def create(event, context):
     params = {}
     params['Name'] = event['ResourceProperties']['Name']
@@ -62,7 +61,7 @@ def update(event, context):
     if requires_new_version:
         logger.info('Resource Definition requires new version')
         params = filter_dictionary(event['ResourceProperties'], version_attributes)
-        params['Resources'] = clean_core_defs(params)['Resources']
+        params['Resources'] = clean_resource_defs(params)['Resources']
         params['ResourceDefinitionId'] = physical_resource_id
         version_response = greengrass_client.create_resource_definition_version(**params)
         version_response.pop('ResponseMetadata', None)

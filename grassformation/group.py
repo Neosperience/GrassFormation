@@ -41,6 +41,15 @@ def create(event, context):
     response = greengrass_client.create_group(**params)
     response.pop('ResponseMetadata', None)
     physical_resource_id = response['Id']
+
+    if 'GroupRoleArn' in event['ResourceProperties']:
+        group_role_arn = event['ResourceProperties']['GroupRoleArn']
+        params = {
+            'GroupId': physical_resource_id,
+            'RoleArn': group_role_arn
+        }
+        greengrass_client.associate_role_to_group(**params)
+
     return physical_resource_id, response
 
 def update(event, context):

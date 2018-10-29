@@ -18,6 +18,9 @@ Parameters:
   IoTLambdaARN:
     Type: String
     Description: "The fully qualified ARN of the lambda function that should be deployed on the core"
+  GroupRoleArn:
+    Type: String
+    Description: "The ARN of the Greengrass Group role"
 
 Resources:
 
@@ -182,6 +185,7 @@ Resources:
       ServiceToken:
         Fn::ImportValue: !Join ["-", [!Ref GFStackName, GroupHandlerLambdaFunctionArn]]
       Name: !Ref GroupNameParameter
+      GroupRoleArn: !Ref GroupRoleArn
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
       ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
       LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn

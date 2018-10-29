@@ -9,6 +9,7 @@ provider:
    - Effect: "Allow"
      Action:
        - "greengrass:*"
+       - "iam:PassRole"
      Resource: "*"
 
 custom:

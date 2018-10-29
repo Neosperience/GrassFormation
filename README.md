@@ -42,6 +42,7 @@ All custom resource lambdas pass most of their attributes to the appropriate AWS
 
 Supported attributes:
  - `Name` (string): The name of the Greengrass Group
+ - `GroupRoleArn` (string): The ARN of the IAM Role to be associated with the Group. Your AWS Greengrass core will use the role to access AWS cloud services. The role's permissions should allow Greengrass core Lambda functions to perform actions against the cloud.
  - `CoreDefinitionVersionArn`, `DeviceDefinitionVersionArn`, `FunctionDefinitionVersionArn`, `SubscriptionDefinitionVersionArn`, `LoggerDefinitionVersionArn`, `ResourceDefinitionVersionArn`: see [Greengrass CreateGroupVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/creategroupversion-post.html) for more info.
 
 ### GrassFormationCore
@@ -58,7 +59,7 @@ Supported attributes:
 
 ## Returned values
 
-Similarly to Supported Parameters, Group and Core custom resource lambda returns pretty much whatever the appropriate AWS API returns. You can find an example how to use them in the `GreengrassGroup` resource definition in th sample stack:
+Similarly to Supported Parameters, the custom resource lambda functions return pretty much whatever the appropriate AWS API returns. You can find an example how to use them in the `GreengrassGroup` resource definition in the sample stack:
 
 ```
 CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn

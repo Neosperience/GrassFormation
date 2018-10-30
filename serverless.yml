@@ -19,15 +19,17 @@ functions:
   GroupHandler:
     handler: grassformation.group.handler
   CoreHandler:
-    handler: grassformation.core.handler
+    handler: grassformation.index.core_handler
   ResourceHandler:
-    handler: grassformation.resource.handler
+    handler: grassformation.index.resource_handler
   LoggerHandler:
-    handler: grassformation.logger.handler
+    handler: grassformation.index.logger_handler
   SubscriptionHandler:
-    handler: grassformation.subscription.handler
+    handler: grassformation.index.subscription_handler
   FunctionHandler:
-    handler: grassformation.function.handler
+    handler: grassformation.index.function_handler
+  DeviceHandler:
+    handler: grassformation.index.device_handler
 
 resources:
   Outputs:
@@ -61,3 +63,8 @@ resources:
       Value: { "Fn::GetAtt": ["FunctionHandlerLambdaFunction", "Arn" ] }
       Export:
         Name: "${self:service}-${self:custom.stage}-FunctionHandlerLambdaFunctionArn"
+    DeviceHandlerLambdaFunctionArn:
+      Description: The ARN of the lambda function handling Greengrass Device resources.
+      Value: { "Fn::GetAtt": ["DeviceHandlerLambdaFunction", "Arn" ] }
+      Export:
+        Name: "${self:service}-${self:custom.stage}-DeviceHandlerLambdaFunctionArn"

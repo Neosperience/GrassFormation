@@ -17,7 +17,7 @@ init_failed = False
 try:
     import boto3
     greengrass_client = boto3.client('greengrass')
-    logger.info("Container initialization completed")
+    logger.info('Container initialization completed')
 except Exception as e:
     logger.error(e, exc_info=True)
     init_failed = e
@@ -52,9 +52,14 @@ def create(event, context):
 
     return physical_resource_id, response
 
+def get_current_definition(identifier):
+    params = { 'GroupId': identifier }
+    response = greengrass_client.get_group(**params)
+    response.pop('ResponseMetadata', None)
+    return response
+
 def update(event, context):
     physical_resource_id = event['PhysicalResourceId']
-    response = {}
     requires_new_version = change_requires_update(logger,
                                                   version_attributes,
                                                   event['OldResourceProperties'],
@@ -63,9 +68,7 @@ def update(event, context):
         logger.info('Group requires new version')
         params = filter_dictionary(event['ResourceProperties'], version_attributes)
         params['GroupId'] = physical_resource_id
-        version_response = greengrass_client.create_group_version(**params)
-        version_response.pop('ResponseMetadata', None)
-        response['Version'] = version_response
+        greengrass_client.create_group_version(**params)
 
     requires_rename = change_requires_update(logger,
                                              ['Name'],
@@ -79,6 +82,7 @@ def update(event, context):
         }
         greengrass_client.update_group(**params)
 
+    response = get_current_definition(physical_resource_id)
     return physical_resource_id, response
 
 def delete(event, context):

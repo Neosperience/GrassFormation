@@ -10,7 +10,7 @@ from grassformation.utils import change_requires_update, filter_dictionary, val_
 from grassformation.greengrass_resource_handler import CollectionHandler
 
 # initialise logger
-logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})
+logger = crhelper.log_config({'RequestId': 'CONTAINER_INIT'})
 logger.info('Logging configured')
 # set global to track init failures
 init_failed = False
@@ -18,7 +18,7 @@ init_failed = False
 try:
     import boto3
     greengrass_client = boto3.client('greengrass')
-    logger.info("Container initialization completed")
+    logger.info('Container initialization completed')
 except Exception as e:
     logger.error(e, exc_info=True)
     init_failed = e

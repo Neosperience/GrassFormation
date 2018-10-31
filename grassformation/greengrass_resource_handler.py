@@ -22,7 +22,7 @@ class CollectionHandler:
     def __init__(self, logger, resource_collection_key, id_key,
                  clean_resource_definition,
                  create_aws_function, create_version_aws_function,
-                 update_aws_function, delete_aws_function):
+                 update_aws_function, delete_aws_function, get_aws_function):
         '''
         Initializes the resource collection handler.
 
@@ -52,6 +52,7 @@ class CollectionHandler:
         self.create_version_aws_function = create_version_aws_function
         self.update_aws_function = update_aws_function
         self.delete_aws_function = delete_aws_function
+        self.get_aws_function = get_aws_function
 
     def clean_resource_definition_collection(self, resource_definition_collection):
         return [self.clean_resource_definition(res) for res in resource_definition_collection]
@@ -70,10 +71,15 @@ class CollectionHandler:
         physical_resource_id = response['Id']
         return physical_resource_id, response
 
+    def get_current_definition(self, identifier):
+        params = { self.id_key: identifier }
+        response = self.get_aws_function(**params)
+        response.pop('ResponseMetadata', None)
+        return response
+
     def update(self, event, context):
         physical_resource_id = event['PhysicalResourceId']
-        response = {}
-        requires_new_version = self.resource_collection_key in params and \
+        requires_new_version = self.resource_collection_key in event['ResourceProperties'] and \
                                change_requires_update(self.logger,
                                                       [self.resource_collection_key],
                                                       event['OldResourceProperties'],
@@ -83,9 +89,7 @@ class CollectionHandler:
             params = filter_dictionary(event['ResourceProperties'], [self.resource_collection_key])
             params[self.resource_collection_key] = self.clean_resource_definition_collection(params[self.resource_collection_key])
             params[self.id_key] = physical_resource_id
-            version_response = self.create_version_aws_function(**params)
-            version_response.pop('ResponseMetadata', None)
-            response['Version'] = version_response
+            self.create_version_aws_function(**params)
 
         requires_rename = change_requires_update(self.logger,
                                                  ['Name'],
@@ -99,6 +103,7 @@ class CollectionHandler:
             }
             self.update_aws_function(**params)
 
+        response = self.get_current_definition(physical_resource_id)
         return physical_resource_id, response
 
     def delete(self, event, context):

@@ -37,7 +37,8 @@ def core_handler(event, context):
                     greengrass_client.create_core_definition,
                     greengrass_client.create_core_definition_version,
                     greengrass_client.update_core_definition,
-                    greengrass_client.delete_core_definition
+                    greengrass_client.delete_core_definition,
+                    greengrass_client.get_core_definition
                )
 
     return crhelper.cfn_handler(event, context,
@@ -67,7 +68,8 @@ def function_handler(event, context):
                     greengrass_client.create_function_definition,
                     greengrass_client.create_function_definition_version,
                     greengrass_client.update_function_definition,
-                    greengrass_client.delete_function_definition
+                    greengrass_client.delete_function_definition,
+                    greengrass_client.get_function_definition
                )
 
     return crhelper.cfn_handler(event, context,
@@ -88,7 +90,8 @@ def logger_handler(event, context):
                     greengrass_client.create_logger_definition,
                     greengrass_client.create_logger_definition_version,
                     greengrass_client.update_logger_definition,
-                    greengrass_client.delete_logger_definition
+                    greengrass_client.delete_logger_definition,
+                    greengrass_client.get_logger_definition
                )
 
     return crhelper.cfn_handler(event, context,
@@ -118,7 +121,8 @@ def resource_handler(event, context):
                     greengrass_client.create_resource_definition,
                     greengrass_client.create_resource_definition_version,
                     greengrass_client.update_resource_definition,
-                    greengrass_client.delete_resource_definition
+                    greengrass_client.delete_resource_definition,
+                    greengrass_client.get_resource_definition
                )
 
     return crhelper.cfn_handler(event, context,
@@ -139,7 +143,8 @@ def subscription_handler(event, context):
                     greengrass_client.create_subscription_definition,
                     greengrass_client.create_subscription_definition_version,
                     greengrass_client.update_subscription_definition,
-                    greengrass_client.delete_subscription_definition
+                    greengrass_client.delete_subscription_definition,
+                    greengrass_client.get_subscription_definition
                )
 
     return crhelper.cfn_handler(event, context,
@@ -160,7 +165,8 @@ def device_handler(event, context):
                     greengrass_client.create_device_definition,
                     greengrass_client.create_device_definition_version,
                     greengrass_client.update_device_definition,
-                    greengrass_client.delete_device_definition
+                    greengrass_client.delete_device_definition,
+                    greengrass_client.get_device_definition
                )
 
     return crhelper.cfn_handler(event, context,

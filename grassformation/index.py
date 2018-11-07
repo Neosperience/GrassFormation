@@ -4,10 +4,10 @@
 AWS Greengrass. '''
 
 import botocore
-from grassformation.utils import crhelper
-from grassformation.utils import keypath
-from grassformation.utils import change_requires_update, filter_dictionary, val_to_bool
-from grassformation.greengrass_resource_handler import CollectionHandler
+from utils import crhelper
+from utils import keypath
+from utils import change_requires_update, filter_dictionary, val_to_bool
+from greengrass_resource_handler import CollectionHandler
 
 # initialise logger
 logger = crhelper.log_config({'RequestId': 'CONTAINER_INIT'})

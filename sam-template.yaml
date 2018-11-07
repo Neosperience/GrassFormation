@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'Lambda functions to provision Greengrass resources with CloudFormation'
+
+Globals:
+
+  Function:
+    MemorySize: 128
+    Timeout: 3
+    Runtime: python3.6
+
+Resources:
+
+  GrassFormationFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: GrassFormationFunctionExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'greengrass:*'
+                  - 'iam:PassRole'
+                Resource: '*'
+
+  GroupHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: group.handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  CoreHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.core_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  ResourceHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.resource_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  LoggerHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.logger_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  SubscriptionHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.subscription_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  FunctionHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.function_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  DeviceHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.device_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+Outputs:
+
+  GroupHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Group resources.
+    Value: !GetAtt GroupHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "GroupHandlerFunctionArn"]]
+
+  CoreHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Core resources.
+    Value: !GetAtt CoreHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "CoreHandlerFunctionArn"]]
+
+  ResourceHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Resource resources.
+    Value: !GetAtt ResourceHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "ResourceHandlerFunctionArn"]]
+
+  LoggerHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Logger resources.
+    Value: !GetAtt LoggerHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "LoggerHandlerFunctionArn"]]
+
+  SubscriptionHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Subscription resources.
+    Value: !GetAtt SubscriptionHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "SubscriptionHandlerFunctionArn"]]
+
+  FunctionHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Function resources.
+    Value: !GetAtt FunctionHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "FunctionHandlerFunctionArn"]]
+
+  DeviceHandlerFunctionArn:
+    Description: The ARN of the lambda function handling Greengrass Device resources.
+    Value: !GetAtt DeviceHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "DeviceHandlerFunctionArn"]]

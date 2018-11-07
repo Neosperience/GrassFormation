@@ -14,7 +14,7 @@ Parameters:
   GFStackName:
     Type: String
     Description: "The name of the CloudFormation stack that deployed the GrassFormation lambda handlers"
-    Default: grassformation-dev
+    Default: GrassFormation
   IoTLambdaARN:
     Type: String
     Description: "The fully qualified ARN of the lambda function that should be deployed on the core"
@@ -68,7 +68,7 @@ Resources:
     Type: Custom::GrassFormationCoreDefinition
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, CoreHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, CoreHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Core"]]
       Cores:
       - CertificateArn: !GetAtt CoreCert.Arn
@@ -80,7 +80,7 @@ Resources:
     Type: Custom::GrassFormationResourceDefinition
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, ResourceHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, ResourceHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Resources"]]
       Resources:
       - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
@@ -117,7 +117,7 @@ Resources:
     Type: Custom::GrassFormationLoggerDefinition
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, LoggerHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, LoggerHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Loggers"]]
       Loggers:
       - Type: FileSystem
@@ -139,7 +139,7 @@ Resources:
     Type: Custom::GrassFormationSubscriptionDefinition
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, SubscriptionHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, SubscriptionHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Subscriptions"]]
       Subscriptions:
         - Id: !Join ["_", [!Ref GroupNameParameter, "Subscription", "Shadow", "Lambda"]]
@@ -151,7 +151,7 @@ Resources:
     Type: Custom::GrassFormationFunctionDefinition
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, FunctionHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, FunctionHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Functions"]]
       Functions:
         - FunctionArn: !Ref IoTLambdaARN
@@ -183,7 +183,7 @@ Resources:
     Type: Custom::GrassFormationGroup
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, GroupHandlerLambdaFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, GroupHandlerFunctionArn]]
       Name: !Ref GroupNameParameter
       GroupRoleArn: !Ref GroupRoleArn
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn

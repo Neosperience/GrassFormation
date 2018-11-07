@@ -4,9 +4,9 @@
 AWS Greengrass Group. '''
 
 import botocore
-from grassformation.utils import crhelper
-from grassformation.utils import keypath
-from grassformation.utils import change_requires_update, filter_dictionary, val_to_bool
+from utils import crhelper
+from utils import keypath
+from utils import change_requires_update, filter_dictionary, val_to_bool
 
 # initialise logger
 logger = crhelper.log_config({"RequestId": "CONTAINER_INIT"})

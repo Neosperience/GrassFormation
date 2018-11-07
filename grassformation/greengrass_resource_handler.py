@@ -4,7 +4,7 @@
 AWS Greengrass. '''
 
 import botocore
-from grassformation.utils import change_requires_update, filter_dictionary
+from utils import change_requires_update, filter_dictionary
 
 class CollectionHandler:
     ''' Instances of this class manages Greengrass CloudFormation resource

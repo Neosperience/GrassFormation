@@ -191,3 +191,160 @@ Resources:
       LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn
       SubscriptionDefinitionVersionArn: !GetAtt SubscriptionDefinition.LatestVersionArn
       FunctionDefinitionVersionArn: !GetAtt FunctionDefinition.LatestVersionArn
+
+
+Outputs:
+
+  # AWS IoT resource outputs
+
+  CoreCertId:
+    Description: The ID of the Core Certificate
+    Value: !Ref CoreCert
+
+  CoreCertArn:
+    Description: The ARN of the Core Certificate
+    Value: !GetAtt CoreCert.Arn
+
+  CoreThingName:
+    Description: The name of the Core Thing
+    Value: !Ref CoreThing
+
+  CorePolicyName:
+    Description: The name of the Core Policy
+    Value: !Ref CorePolicy
+
+  CorePolicyArn:
+    Description: The ARN of the Core Policy
+    Value: !GetAtt CorePolicy.Arn
+
+  # GrassFormation CoreDefinition resource outputs
+
+  CoreDefinitionName:
+    Description: The name of the CoreDefinition
+    Value: !GetAtt CoreDefinition.Name
+
+  CoreDefinitionId:
+    Description: The ID of the CoreDefinition
+    Value: !GetAtt CoreDefinition.Id
+
+  CoreDefinitionArn:
+    Description: The ARN of the CoreDefinition
+    Value: !GetAtt CoreDefinition.Arn
+
+  CoreDefinitionLatestVersionId:
+    Description: The ID of the latest version of CoreDefinition
+    Value: !GetAtt CoreDefinition.LatestVersion
+
+  CoreDefinitionLatestVersionArn:
+    Description: The ARN of the latest version of CoreDefinition
+    Value: !GetAtt CoreDefinition.LatestVersionArn
+
+  # GrassFormation ResourceDefinition resource outputs
+
+  ResourceDefinitionName:
+    Description: The name of the ResourceDefinition
+    Value: !GetAtt ResourceDefinition.Name
+
+  ResourceDefinitionId:
+    Description: The ID of the ResourceDefinition
+    Value: !GetAtt ResourceDefinition.Id
+
+  ResourceDefinitionArn:
+    Description: The ARN of the ResourceDefinition
+    Value: !GetAtt ResourceDefinition.Arn
+
+  ResourceDefinitionLatestVersionId:
+    Description: The ID of the latest version of ResourceDefinition
+    Value: !GetAtt ResourceDefinition.LatestVersion
+
+  ResourceDefinitionLatestVersionArn:
+    Description: The ARN of the latest version of ResourceDefinition
+    Value: !GetAtt ResourceDefinition.LatestVersionArn
+
+  # GrassFormation LoggerDefinition resource outputs
+
+  LoggerDefinitionName:
+    Description: The name of the LoggerDefinition
+    Value: !GetAtt LoggerDefinition.Name
+
+  LoggerDefinitionId:
+    Description: The ID of the LoggerDefinition
+    Value: !GetAtt LoggerDefinition.Id
+
+  LoggerDefinitionArn:
+    Description: The ARN of the LoggerDefinition
+    Value: !GetAtt LoggerDefinition.Arn
+
+  LoggerDefinitionLatestVersionId:
+    Description: The ID of the latest version of LoggerDefinition
+    Value: !GetAtt LoggerDefinition.LatestVersion
+
+  LoggerDefinitionLatestVersionArn:
+    Description: The ARN of the latest version of LoggerDefinition
+    Value: !GetAtt LoggerDefinition.LatestVersionArn
+
+  # GrassFormation SubscriptionDefinition resource outputs
+
+  SubscriptionDefinitionName:
+    Description: The name of the SubscriptionDefinition
+    Value: !GetAtt SubscriptionDefinition.Name
+
+  SubscriptionDefinitionId:
+    Description: The ID of the SubscriptionDefinition
+    Value: !GetAtt SubscriptionDefinition.Id
+
+  SubscriptionDefinitionArn:
+    Description: The ARN of the SubscriptionDefinition
+    Value: !GetAtt SubscriptionDefinition.Arn
+
+  SubscriptionDefinitionLatestVersionId:
+    Description: The ID of the latest version of SubscriptionDefinition
+    Value: !GetAtt SubscriptionDefinition.LatestVersion
+
+  SubscriptionDefinitionLatestVersionArn:
+    Description: The ARN of the latest version of SubscriptionDefinition
+    Value: !GetAtt SubscriptionDefinition.LatestVersionArn
+
+  # GrassFormation FunctionDefinition resource outputs
+
+  FunctionDefinitionName:
+    Description: The name of the FunctionDefinition
+    Value: !GetAtt FunctionDefinition.Name
+
+  FunctionDefinitionId:
+    Description: The ID of the FunctionDefinition
+    Value: !GetAtt FunctionDefinition.Id
+
+  FunctionDefinitionArn:
+    Description: The ARN of the FunctionDefinition
+    Value: !GetAtt FunctionDefinition.Arn
+
+  FunctionDefinitionLatestVersionId:
+    Description: The ID of the latest version of FunctionDefinition
+    Value: !GetAtt FunctionDefinition.LatestVersion
+
+  FunctionDefinitionLatestVersionArn:
+    Description: The ARN of the latest version of FunctionDefinition
+    Value: !GetAtt FunctionDefinition.LatestVersionArn
+
+  # GrassFormation GreengrassGroup resource outputs
+
+  GreengrassGroupName:
+    Description: The name of the GreengrassGroup
+    Value: !GetAtt GreengrassGroup.Name
+
+  GreengrassGroupId:
+    Description: The ID of the GreengrassGroup
+    Value: !GetAtt GreengrassGroup.Id
+
+  GreengrassGroupArn:
+    Description: The ARN of the GreengrassGroup
+    Value: !GetAtt GreengrassGroup.Arn
+
+  GreengrassGroupLatestVersionId:
+    Description: The ID of the latest version of the GreengrassGroup
+    Value: !GetAtt GreengrassGroup.LatestVersion
+
+  GreengrassGroupLatestVersionArn:
+    Description: The ARN of the latest version of the GreengrassGroup
+    Value: !GetAtt GreengrassGroup.LatestVersionArn

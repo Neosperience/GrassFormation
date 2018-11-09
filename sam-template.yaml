@@ -1,13 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
 Description: 'Lambda functions to provision Greengrass resources with CloudFormation'
-
-Globals:
-
-  Function:
-    MemorySize: 128
-    Timeout: 3
-    Runtime: python3.6
 
 Resources:
 
@@ -38,77 +30,132 @@ Resources:
   # Exported functions
 
   GroupHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.group_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   CoreHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.core_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   ResourceHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.resource_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   LoggerHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.logger_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   SubscriptionHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.subscription_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   FunctionHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.function_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   DeviceHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.device_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   DispatchHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: index.dispatch_handler
-      CodeUri: grassformation
+      Code: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
 # CloudFormation transform macro
 
-  MacroHandlerFunction:
-    Type: 'AWS::Serverless::Function'
+  MacroFunction:
+    Type: 'AWS::Lambda::Function'
     Properties:
       Handler: macro.handler
-      CodeUri: grassformation
+      Code: grassformation
       Environment:
         Variables:
           DISPATCH_HANDLER_LAMBDA_ARN: !GetAtt DispatchHandlerFunction.Arn
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+      MemorySize: 128
+      Timeout: 3
+      Runtime: python3.6
 
   Macro:
     Type: AWS::CloudFormation::Macro
     Properties:
       Name: GrassFormation
-      FunctionName: !GetAtt MacroHandlerFunction.Arn
+      FunctionName: !GetAtt MacroFunction.Arn
+
+  MacroFunctionPermissions:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt MacroFunction.Arn
+      Principal: 'cloudformation.amazonaws.com'
+
+  MacroFunctionExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: ['logs:*']
+                Resource: 'arn:aws:logs:*:*:*'
 
 Outputs:
 

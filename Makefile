@@ -1,5 +1,5 @@
 project_name = GrassFormation
-AWS_DEFAULT_REGION = $(if $(AWS_DEFAULT_REGION),$(AWS_DEFAULT_REGION),"us-east-1")
+AWS_DEFAULT_REGION := $(if $(AWS_DEFAULT_REGION),$(AWS_DEFAULT_REGION),"us-east-1")
 
 src_dir = grassformation
 dist_dir = dist
@@ -103,7 +103,7 @@ $(dist_dir)/.deploy: packaged-template.yaml
 		--template-file packaged-template.yaml \
 		--stack-name $(stack_name) \
 		--capabilities CAPABILITY_IAM \
-		--region $(region)
+		--region $(AWS_DEFAULT_REGION)
 	@touch $@
 	$(info [*] Stack outputs:)
 	@aws cloudformation describe-stacks \

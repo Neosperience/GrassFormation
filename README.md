@@ -10,6 +10,8 @@ A packaged CloudFormation template is provided for you for easy, on-click instal
 
 [![Install GrassFormation to your account](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GrassFormation&templateURL=https://s3.amazonaws.com/sam-packages.neosperience.com/GrassFormation/template/3caba5500e034c73f45957da2112faa5.yaml)
 
+On the CloudFormation Management Console click three times "Next", acknowledge the creation of the IAM role (they are the lambda function execution roles) and finally "Create". When the stack finished the deployment you can start writing CloudFormation stacks that deploy Greengrass resources. An example template is provided in the `examples/fullgrass.yaml` file.
+
 ### Manual installation
 
 Use this method if you're familiar with [Serverless Application Model](https://github.com/awslabs/serverless-application-model) and want to have full control over the installation.

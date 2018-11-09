@@ -86,12 +86,16 @@ endif
 	touch $@
 
 packaged-template.yaml: sam-template.yaml $(dist_dir)/.dist | $(dist_dir)/.$(SAM_S3_BUCKET)
-	$(info [+] Packing and uploading distribution package...)
+	@echo "[+] Packing and uploading distribution package..."
 	aws cloudformation package \
 		--template-file sam-template.yaml \
 		--output-template-file packaged-template.yaml \
 		--s3-bucket $(SAM_S3_BUCKET) \
 		--s3-prefix $(s3_prefix)
+	@echo "[*] Distribution package uploaded to s3://$(SAM_S3_BUCKET)/$(s3_prefix)/ folder"
+	@echo "[+] Uploading the packaged CloudFormation template..."
+	aws s3 cp packaged-template.yaml s3://$(SAM_S3_BUCKET)/$(s3_prefix)/template.yaml
+	@echo "[*] CloudFormation template uploaded to s3://$(SAM_S3_BUCKET)/$(s3_prefix)/template.yaml"
 
 #:    deploy           : Deploys or updates the service with CloudFormation
 .PHONY: deploy

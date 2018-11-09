@@ -1,24 +1,15 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: GrassFormation test to create a complete Greengrass Stack
-Transform: GrassFormation
+Transform: ['AWS::Serverless-2016-10-31', 'GrassFormation']
 
 Parameters:
   GroupNameParameter:
     Type: String
     Description: "Name of the Greengrass Group"
-  CoreShadowHandlerARN:
-    Type: String
-    Description: "The ARN of the lambda function that should handle the Core Shadow"
   CSRParameter:
     Type: String
     Description: "The Certificate Signing Request for the Core certificate"
-  IoTLambdaARN:
-    Type: String
-    Description: "The fully qualified ARN of the lambda function that should be deployed on the core"
-  GroupRoleArn:
-    Type: String
-    Description: "The ARN of the Greengrass Group role"
 
 Resources:
 
@@ -77,35 +68,21 @@ Resources:
     Properties:
       Name: !Join ["_", [!Ref GroupNameParameter, "Resources"]]
       Resources:
-      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
-        Name: "videoDevice"
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "randomDevice"]]
+        Name: "randomDevice"
         ResourceDataContainer:
           LocalDeviceResourceData:
             GroupOwnerSetting:
               AutoAddGroupOwner: true
-            SourcePath: "/dev/video0"
-      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreInterface"]]
-        Name: "videoCoreInterface"
-        ResourceDataContainer:
-          LocalDeviceResourceData:
-            GroupOwnerSetting:
-              AutoAddGroupOwner: true
-            SourcePath: "/dev/vchiq"
-      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreSharedMemory"]]
-        Name: "videoCoreSharedMemory"
-        ResourceDataContainer:
-          LocalDeviceResourceData:
-            GroupOwnerSetting:
-              AutoAddGroupOwner: true
-            SourcePath: "/dev/vcsm"
-      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "GStreamerKVSPlugingPath"]]
-        Name: "GStreamerKVSPlugingPath"
+            SourcePath: "/dev/random"
+      - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "homeDirectory"]]
+        Name: "homeDirectory"
         ResourceDataContainer:
           LocalVolumeResourceData:
             GroupOwnerSetting:
               AutoAddGroupOwner: true
-            SourcePath: "/home/pi/opt/amazon-kinesis-video-streams-producer-sdk-cpp/kinesis-video-native-build/downloads/local/lib"
-            DestinationPath: "/kvs/local/lib"
+            SourcePath: "/home/pi/"
+            DestinationPath: "/home"
 
   LoggerDefinition:
     Type: NSP::GrassFormation::Logger
@@ -119,12 +96,12 @@ Resources:
         Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "FileSystem", "GreengrassSystem"]]
       - Type: FileSystem
         Component: Lambda
-        Level: WARN
+        Level: INFO
         Space: 25600
         Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "FileSystem", "Lambda"]]
       - Type: AWSCloudWatch
         Component: Lambda
-        Level: WARN
+        Level: INFO
         Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "AWSCloudWatch", "Lambda"]]
 
   SubscriptionDefinition:
@@ -134,7 +111,7 @@ Resources:
       Subscriptions:
         - Id: !Join ["_", [!Ref GroupNameParameter, "Subscription", "Shadow", "Lambda"]]
           Source: GGShadowService
-          Target: !Ref CoreShadowHandlerARN
+          Target: !Ref GreengrassLambdaFunction.Alias
           Subject: !Join ["/", ["$aws/things", !Ref CoreThing, "shadow/update/delta"]]
 
   FunctionDefinition:
@@ -142,25 +119,19 @@ Resources:
     Properties:
       Name: !Join ["_", [!Ref GroupNameParameter, "Functions"]]
       Functions:
-        - FunctionArn: !Ref IoTLambdaARN
+        - FunctionArn: !Ref GreengrassLambdaFunction.Alias
           FunctionConfiguration:
             EncodingType: json
             Environment:
               AccessSysfs: false
               ResourceAccessPolicies:
-                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
-                  Permission: rw
-                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreSharedMemory"]]
-                  Permission: rw
-                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoCoreInterface"]]
-                  Permission: rw
-                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "GStreamerKVSPlugingPath"]]
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "randomDevice"]]
+                  Permission: ro
+                - ResourceId: !Join ["_", [!Ref GroupNameParameter, "Resource", "homeDirectory"]]
                   Permission: ro
               Variables:
                 AWS_DEFAULT_REGION: !Ref "AWS::Region"
-                KVS_NAME: janos-raspberry-pi-stream
-                GST_PLUGIN_PATH: "/kvs/local/lib"
-                LD_LIBRARY_PATH: "/kvs/local/lib"
+                HELLO: WORLD
             Executable: lambda.handler
             MemorySize: 131072
             Pinned: true
@@ -172,13 +143,60 @@ Resources:
     Properties:
       GrassFormationResourceType: Group
       Name: !Ref GroupNameParameter
-      GroupRoleArn: !Ref GroupRoleArn
+      GroupRoleArn: !GetAtt GreengrassGroupRole.Arn
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
       ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
       LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn
       SubscriptionDefinitionVersionArn: !GetAtt SubscriptionDefinition.LatestVersionArn
       FunctionDefinitionVersionArn: !GetAtt FunctionDefinition.LatestVersionArn
 
+  # Sample lambda function to be deployed on Greengrass Core
+
+  GreengrassLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python2.7
+      InlineCode: !Sub |
+        import json
+        import time
+        import struct
+        import logging
+        import os
+
+        logging.info('Hello from Lambda function handler running on ${CoreDefinition.Name}')
+        logging.info('Found in environment variable HELLO: {}'.format(os.environ.get('HELLO', 'None :(')))
+        logging.info('AWS Default region: {}'.format(os.environ.get('AWS_DEFAULT_REGION', 'None')))
+
+        def handler(event, context):
+          logging.info('Received event: ')
+          logging.info(json.dumps(event))
+
+        while True:
+          time.sleep(10)
+          with open('/dev/random', 'rb') as rnd:
+            rnd_int = struct.unpack('I', rnd.read(4))[0]
+            logging.info('Long running test got random number: {}'.format(rnd_int))
+
+      AutoPublishAlias: DEV
+      MemorySize: 128
+      Timeout: 3
+
+  GreengrassGroupRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: greengrass.amazonaws.com
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGreengrassResourceAccessRolePolicy
+        - arn:aws:iam::aws:policy/AWSGreengrassFullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
 
 Outputs:
 
@@ -335,3 +353,13 @@ Outputs:
   GreengrassGroupLatestVersionArn:
     Description: The ARN of the latest version of the GreengrassGroup
     Value: !GetAtt GreengrassGroup.LatestVersionArn
+
+  # Greengrass Lambda resource outputs
+
+  GreengrassLambdaFullArn:
+    Description: The fully qualified ARN of the lambda function running on Greengrass core
+    Value: !Ref GreengrassLambdaFunction.Alias
+
+  GreengrassGroupRoleArn:
+    Description: The ARN of the IAM Role of the Greengrass Group
+    Value: !GetAtt GreengrassGroupRole.Arn

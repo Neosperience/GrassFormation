@@ -30,15 +30,14 @@ Pick up `examples/fullgrass.yaml` and head to the [CloudFormation management con
 ```
 
  - `GroupNameParameter`: The name of the Greengrass Group.
- - `CoreShadowHandlerARN`: The ARN of the lambda function that will handle the Core Shadow updates.
- - `IoTLambdaARN`: The ARN of the lambda function that will be deployed on the Greengrass Core. This function is configured by the stack to run indefinitely. It might be the same lambda function as `CoreShadowHandlerARN`. You should create an Alias for both lambda functions that points to a real version (not to `$LATEST`) and specify also the alias in the ARN, for example: `arn:aws:lambda:us-east-1:123456789012:function:myLambda:MYALIAS`
- - `GroupRoleArn`: The ARN of the IAM Role that will be associated with the Greengrass Group. Lambda functions running on Greengrass Core do not use the IAM Lambda role defined at the moment of the creation of the lambda function but use this role instead.
+
+The sample stack comes with a lambda function that will be deployed to the Greengrass Core device. The stack configures access to a simple hardware device (in this case `/dev/random`) and the lambda function shows you how to access this device. Two environment variables: `AWS_DEFAULT_REGION` and `HELLO` are also configured from the stack and accessed from the lambda. The lambda is running indefinitely and it periodically sends a random number picked up from `/dev/random` to CloudWatch and local file system logs so you can test the logger configuration.
 
 ## Deleting the sample CloudFormation stack
 
 There is one glitch when you want to delete the sample CloudFormation stack. The `AWS::IoT::Certificate` type resource named `CoreCert` is left in `ACTIVATE` state after the deployment of the stack. This is necessary for the Greengrass Core to work. However this resource can not be deleted until it is not deactivated. So before starting the deletion of the stack you should deactivate it manually. Pick up the Physical ID of the `CoreCert` resource: you can find it under the "Resources" section of the details page of your deployed CloudFormation stack. Then call this command of the aws cli:
 
-```
+```shell
 aws iot update-certificate --certificate-id [Physical ID from CF] --new-status INACTIVE
 ```
 
@@ -110,7 +109,7 @@ Supported attributes:
 
 ## Returned values
 
-Similarly to Supported Parameters, the custom resource lambda functions return pretty much whatever the appropriate AWS API returns. For all Greengrass resources managed by Grassformation the return value has the following schema:
+Similarly to Supported Parameters, the custom resource lambda functions return pretty much whatever the appropriate AWS API returns. For all Greengrass resources managed by GrassFormation the return value has the following schema:
 
  - `Name` : string. The name of the resource definition.
  - `Id`: string. The ID of the resource definition.
@@ -120,6 +119,6 @@ Similarly to Supported Parameters, the custom resource lambda functions return p
 
 You can find an example how to use them in the `GreengrassGroup` resource definition in the sample stack:
 
-```
+```yaml
 CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
 ```

@@ -69,7 +69,7 @@ All custom resource handler lambdas pass most of their attributes to the appropr
 Supported attributes:
  - `Name` (string): The name of the Greengrass Group
  - `GroupRoleArn` (string): The ARN of the IAM Role to be associated with the Group. Your AWS Greengrass core will use the role to access AWS cloud services. The role's permissions should allow Greengrass core Lambda functions to perform actions against the cloud. The ARN specified in this attribute will be passed to the [AssociateRoleToGroup](https://docs.aws.amazon.com/greengrass/latest/apireference/associateroletogroup-put.html) API.
- - `CoreDefinitionVersionArn`, `DeviceDefinitionVersionArn`, `FunctionDefinitionVersionArn`, `SubscriptionDefinitionVersionArn`, `LoggerDefinitionVersionArn`, `ResourceDefinitionVersionArn`: see [Greengrass CreateGroupVersion API](https://docs.aws.amazon.com/greengrass/latest/apireference/creategroupversion-post.html) for more info.
+ - `CoreDefinitionVersionArn`, `DeviceDefinitionVersionArn`, `FunctionDefinitionVersionArn`, `SubscriptionDefinitionVersionArn`, `LoggerDefinitionVersionArn`, `ResourceDefinitionVersionArn`: see [CreateGroupVersion](https://docs.aws.amazon.com/greengrass/latest/apireference/creategroupversion-post.html) API for more info.
 
 ### NSP::GrassFormation::Core
 

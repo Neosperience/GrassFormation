@@ -35,6 +35,8 @@ Resources:
                   - 'iam:PassRole'
                 Resource: '*'
 
+  # Exported functions
+
   GroupHandlerFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -90,6 +92,23 @@ Resources:
       Handler: index.dispatch_handler
       CodeUri: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+# CloudFormation transform macro
+
+  MacroHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: macro.handler
+      CodeUri: grassformation
+      Environment:
+        Variables:
+          DISPATCH_HANDLER_LAMBDA_ARN: !GetAtt DispatchHandlerFunction.Arn
+
+  Macro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: GrassFormation
+      FunctionName: !GetAtt MacroHandlerFunction.Arn
 
 Outputs:
 

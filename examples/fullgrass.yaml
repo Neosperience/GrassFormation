@@ -1,6 +1,8 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: GrassFormation test to create a complete Greengrass Stack
+Transform: GrassFormation
+
 Parameters:
   GroupNameParameter:
     Type: String
@@ -11,10 +13,6 @@ Parameters:
   CSRParameter:
     Type: String
     Description: "The Certificate Signing Request for the Core certificate"
-  GFStackName:
-    Type: String
-    Description: "The name of the CloudFormation stack that deployed the GrassFormation lambda handlers"
-    Default: GrassFormation
   IoTLambdaARN:
     Type: String
     Description: "The fully qualified ARN of the lambda function that should be deployed on the core"
@@ -65,10 +63,8 @@ Resources:
       PolicyName: !Ref CorePolicy
 
   CoreDefinition:
-    Type: Custom::GrassFormationCoreDefinition
+    Type: NSP::GrassFormation::Core
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, CoreHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Core"]]
       Cores:
       - CertificateArn: !GetAtt CoreCert.Arn
@@ -77,10 +73,8 @@ Resources:
         ThingArn: !Join ["", ["arn:", !Ref "AWS::Partition", ":iot:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":thing/", !Ref CoreThing]]
 
   ResourceDefinition:
-    Type: Custom::GrassFormationResourceDefinition
+    Type: NSP::GrassFormation::Resource
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, ResourceHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Resources"]]
       Resources:
       - Id: !Join ["_", [!Ref GroupNameParameter, "Resource", "videoDevice"]]
@@ -114,10 +108,8 @@ Resources:
             DestinationPath: "/kvs/local/lib"
 
   LoggerDefinition:
-    Type: Custom::GrassFormationLoggerDefinition
+    Type: NSP::GrassFormation::Logger
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, LoggerHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Loggers"]]
       Loggers:
       - Type: FileSystem
@@ -136,10 +128,8 @@ Resources:
         Id: !Join ["_", [!Ref GroupNameParameter, "Logger", "AWSCloudWatch", "Lambda"]]
 
   SubscriptionDefinition:
-    Type: Custom::GrassFormationSubscriptionDefinition
+    Type: NSP::GrassFormation::Subscription
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, SubscriptionHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Subscriptions"]]
       Subscriptions:
         - Id: !Join ["_", [!Ref GroupNameParameter, "Subscription", "Shadow", "Lambda"]]
@@ -148,10 +138,8 @@ Resources:
           Subject: !Join ["/", ["$aws/things", !Ref CoreThing, "shadow/update/delta"]]
 
   FunctionDefinition:
-    Type: Custom::GrassFormationFunctionDefinition
+    Type: NSP::GrassFormation::Function
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, FunctionHandlerFunctionArn]]
       Name: !Join ["_", [!Ref GroupNameParameter, "Functions"]]
       Functions:
         - FunctionArn: !Ref IoTLambdaARN
@@ -180,10 +168,8 @@ Resources:
           Id: !Join ["_", [!Ref GroupNameParameter, "Function", "nsp-instore-streamer-dev-iot-runner"]]
 
   GreengrassGroup:
-    Type: Custom::GrassFormationGroup
+    Type: NSP::GrassFormation::Group
     Properties:
-      ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, DispatchHandlerFunctionArn]]
       GrassFormationResourceType: Group
       Name: !Ref GroupNameParameter
       GroupRoleArn: !Ref GroupRoleArn

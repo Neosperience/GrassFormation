@@ -8,7 +8,7 @@ GrassFormation is a collection of AWS lambda functions and a CloudFormation tran
 
 A packaged CloudFormation template is provided for you for easy, on-click installation of GrassFormation. This is the recommended method. This template will install some lambda functions to handle Greengrass resources creation requests, and the macro definition to easily integrate the resources into your stack. When you are ready, click on the button bellow:
 
-[![Install GrassFormation to your account](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://s3.amazonaws.com/sam-packages.neosperience.com/GrassFormation/template/3caba5500e034c73f45957da2112faa5.yaml)
+[![Install GrassFormation to your account](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GrassFormation&templateURL=https://s3.amazonaws.com/sam-packages.neosperience.com/GrassFormation/template/3caba5500e034c73f45957da2112faa5.yaml)
 
 ### Manual installation
 

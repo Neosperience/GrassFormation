@@ -183,7 +183,8 @@ Resources:
     Type: Custom::GrassFormationGroup
     Properties:
       ServiceToken:
-        Fn::ImportValue: !Join ["-", [!Ref GFStackName, GroupHandlerFunctionArn]]
+        Fn::ImportValue: !Join ["-", [!Ref GFStackName, DispatchHandlerFunctionArn]]
+      GrassFormationResourceType: Group
       Name: !Ref GroupNameParameter
       GroupRoleArn: !Ref GroupRoleArn
       CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn

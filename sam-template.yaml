@@ -38,7 +38,7 @@ Resources:
   GroupHandlerFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: group.handler
+      Handler: index.group_handler
       CodeUri: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
 
@@ -81,6 +81,13 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: index.device_handler
+      CodeUri: grassformation
+      Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
+
+  DispatchHandlerFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.dispatch_handler
       CodeUri: grassformation
       Role: !GetAtt [ GrassFormationFunctionRole, Arn ]
 
@@ -127,3 +134,9 @@ Outputs:
     Value: !GetAtt DeviceHandlerFunction.Arn
     Export:
       Name: !Join ["-", [!Ref "AWS::StackName", "DeviceHandlerFunctionArn"]]
+
+  DispatchHandlerFunctionArn:
+    Description: The ARN of the lambda function handling all Greengrass resources.
+    Value: !GetAtt DispatchHandlerFunction.Arn
+    Export:
+      Name: !Join ["-", [!Ref "AWS::StackName", "DispatchHandlerFunctionArn"]]

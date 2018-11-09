@@ -15,7 +15,7 @@ A Makefile is provided for your convenience. To deploy the stack with make you s
 $ make deploy SAM_S3_BUCKET=my-bucket AWS_DEFAULT_REGION=eu-west-1
 ```
 
-Now you can start writing CloudFormation stacks that deploy Grassformation resources. An example template is provided in the `examples/fullgrass.yaml` file.
+Now you can start writing CloudFormation stacks that deploy Greengrass resources. An example template is provided in the `examples/fullgrass.yaml` file.
 
 ## Deploying the sample CloudFormation stack
 

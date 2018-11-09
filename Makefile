@@ -1,6 +1,5 @@
 project_name = GrassFormation
-region = us-east-1
-s3_bucket = sam-packages.neosperience.com
+AWS_DEFAULT_REGION = $(if $(AWS_DEFAULT_REGION),$(AWS_DEFAULT_REGION),"us-east-1")
 
 src_dir = grassformation
 dist_dir = dist
@@ -11,7 +10,7 @@ stack_name = $(project_name)
 dist_files = $(patsubst $(src_dir)/%.py,$(dist_dir)/%.py,$(src_files))
 dist_req = $(dist_dir)/Pipenv
 
-all: deploy
+all: help
 
 #:    help             : Prints this help
 .PHONY: help
@@ -23,12 +22,14 @@ help: Makefile
 	@sed -n 's/^#://p' $<
 	@echo ""
 	@echo "Global parameters:"
-	@echo "    region           : The AWS region of the deployment. Defaults to us-east-1."
-	@echo "    s3_bucket        : The name of the deployment AWS bucket region. Defaults to sam-packages.neosperience.com."
+	@echo "    AWS_DEFAULT_REGION   : The AWS region of the deployment. Defaults to us-east-1."
+	@echo "    SAM_S3_BUCKET        : The name of the deployment AWS bucket region. Required."
+	@echo ""
+	@echo "Global parameters can be set as shell environment variables or as command line arguments."
 	@echo ""
 	@echo "Examples:"
 	@echo "    make local"
-	@echo "    make deploy region=us-west-1"
+	@echo "    make deploy SAM_S3_BUCKET=my-bucket"
 	@echo "    make remove"
 	@echo ""
 
@@ -75,18 +76,21 @@ local:
 	$(info [+] Starting local test environment...)
 	sam local start-api
 
-$(dist_dir)/.bucket:
+$(dist_dir)/.$(SAM_S3_BUCKET):
+ifeq ($(SAM_S3_BUCKET),)
+$(error SAM_S3_BUCKET variable is not set. Set it as environment variable or as command line argument.)
+endif
 	@echo ""
 	@echo "Creating s3 bucket..."
-	aws s3 mb s3://$(s3_bucket)
-	@touch $@
+	aws s3 mb s3://$(SAM_S3_BUCKET)
+	touch $@
 
-packaged-template.yaml: sam-template.yaml $(dist_dir)/.dist | $(dist_dir)/.bucket
+packaged-template.yaml: sam-template.yaml $(dist_dir)/.dist | $(dist_dir)/.$(SAM_S3_BUCKET)
 	$(info [+] Packing and uploading distribution package...)
 	aws cloudformation package \
 		--template-file sam-template.yaml \
 		--output-template-file packaged-template.yaml \
-		--s3-bucket $(s3_bucket) \
+		--s3-bucket $(SAM_S3_BUCKET) \
 		--s3-prefix $(s3_prefix)
 
 #:    deploy           : Deploys or updates the service with CloudFormation

@@ -9,10 +9,10 @@ This project supports [Serverless Application Model](https://github.com/awslabs/
  - The AWS CLI (command line interface) installed.
  - To be able to use the local testing functionalities, also AWS SAM CLI installed.
 
-A Makefile is provided for your convenience so you could simple issue:
+A Makefile is provided for your convenience. To deploy the stack with make you should pass an s3 bucket name where the packaged SAM application will be deployed and optionally set the AWS region of the deployment (defaults to us-east-1). These variables can be also set as shell environment variables.
 
 ```
-$ make deploy
+$ make deploy SAM_S3_BUCKET=my-bucket AWS_DEFAULT_REGION=eu-west-1
 ```
 
 Now you can start writing CloudFormation stacks that deploy Kinesis Video Stream (KVS) resources. An example template is provided in the `examples/fullgrass.yaml` file.

@@ -1,6 +1,32 @@
 # GrassFormation
 
-GrassFormation is a collection of AWS lambda functions and a CloudFormation transform macro that allows you to deploy Greengrass resources with CloudFormation that are otherwise not supported.
+GrassFormation is a collection of [serverless](https://en.wikipedia.org/wiki/Serverless_computing) functions that you can install on your [Amazon Web Services](https://aws.amazon.com/what-is-aws/) (AWS) account. They enable you to easily provision [AWS IoT](https://aws.amazon.com/iot/), specifically Greengrass resources on your account in a reproducible, controlled way.
+
+[Greengrass](https://aws.amazon.com/greengrass/) is a software solution of AWS that allows you to remotely provision software code and device configuration on IoT devices. At the time there are two ways to use Greengrass: from the [AWS Management Console](https://console.aws.amazon.com/iot/home#/greengrassIntro) and programmatically from one of the [AWS SDKs](https://aws.amazon.com/tools/#sdk). The first method works well for prototyping but does not allow you to create a reliable, reproducible, production ready deployment pipeline. The second method is extremely tedious and error prone considering the complexity of the [Greengrass data model](https://read.acloud.guru/aws-greengrass-the-missing-manual-2ac8df2fbdf4#ad8d). The standard way to create cloud infrastructure in a reproducible, testable and automatic way on AWS infrastructure is to use [CloudFormation](https://aws.amazon.com/cloudformation/) templates. Unfortunately at the time there is no support for Greengrass resources in CloudFormation. GrassFormation aims to remedy this shortcoming.
+
+GrassFormation is a collection of [AWS lambda](https://aws.amazon.com/lambda/) functions and a CloudFormation [transform macro](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html) that allows you to deploy resources with CloudFormation that are otherwise not supported. After installing GrassFormation you can provision for example a Greengrass Group together with your other resources from a CloudFormation template as simple as:
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+
+# Add GrassFormation to the transform section of your template:
+Transform: ['AWS::Serverless-2016-10-31', 'GrassFormation']
+
+GreengrassGroup:
+  # GrassFormation defines new template types:
+  Type: NSP::GrassFormation::Group
+  Properties:
+    Name: !Ref GroupNameParameter
+    # Refer to other resources required by the Group in the standard CF way:
+    GroupRoleArn: !GetAtt GreengrassGroupRole.Arn
+    CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
+    ResourceDefinitionVersionArn: !GetAtt ResourceDefinition.LatestVersionArn
+    LoggerDefinitionVersionArn: !GetAtt LoggerDefinition.LatestVersionArn
+    SubscriptionDefinitionVersionArn: !GetAtt SubscriptionDefinition.LatestVersionArn
+    FunctionDefinitionVersionArn: !GetAtt FunctionDefinition.LatestVersionArn
+```
+
+For more examples see the [examples](examples) folder.
 
 ## Installing
 

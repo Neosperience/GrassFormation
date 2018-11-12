@@ -16,7 +16,7 @@ This CloudFormation template shows you how to install, configure and link togeth
 
 ### Deploying
 
-Download [examples/fullgrass.yaml](examples/fullgrass.yaml) and head to the [CloudFormation management console](https://console.aws.amazon.com/cloudformation/home). Select "Create Stack" and upload the template file to S3. You will have to fill out the following stack parameters:
+Download [fullgrass.yaml](fullgrass.yaml) and head to the [CloudFormation management console](https://console.aws.amazon.com/cloudformation/home). Select "Create Stack" and upload the template file to S3. You will have to fill out the following stack parameters:
 
  - `GroupNameParameter`: The name of the Greengrass Group. All resources created by this template will be prefixed by this string.
 

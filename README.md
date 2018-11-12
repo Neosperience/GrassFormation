@@ -140,3 +140,11 @@ You can find an example how to use them in the `GreengrassGroup` resource defini
 ```yaml
 CoreDefinitionVersionArn: !GetAtt CoreDefinition.LatestVersionArn
 ```
+
+## Authors
+
+Created by [@jtolgyesi](http://twitter.com/jtolgyesi) at [Neosperience](http://www.neosperience.com/).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

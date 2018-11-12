@@ -2,7 +2,7 @@
 
 GrassFormation is a collection of [serverless](https://en.wikipedia.org/wiki/Serverless_computing) functions that you can install on your [Amazon Web Services](https://aws.amazon.com/what-is-aws/) (AWS) account. They enable you to easily provision [AWS IoT](https://aws.amazon.com/iot/), specifically Greengrass resources on your account in a reproducible, controlled way.
 
-[Greengrass](https://aws.amazon.com/greengrass/) is a software solution of AWS that allows you to remotely provision software code and device configuration on IoT devices. At the time there are two ways to use Greengrass: from the [AWS Management Console](https://console.aws.amazon.com/iot/home#/greengrassIntro) and programmatically from one of the [AWS SDKs](https://aws.amazon.com/tools/#sdk). The first method works well for prototyping but does not allow you to create a reliable, reproducible, production ready deployment pipeline. The second method is extremely tedious and error prone considering the complexity of the [Greengrass data model](https://read.acloud.guru/aws-greengrass-the-missing-manual-2ac8df2fbdf4#ad8d). The standard way to create cloud infrastructure in a reproducible, testable and automatic way on AWS infrastructure is to use [CloudFormation](https://aws.amazon.com/cloudformation/) templates. Unfortunately at the time there is no support for Greengrass resources in CloudFormation. GrassFormation aims to remedy this shortcoming.
+[Greengrass](https://aws.amazon.com/greengrass/) is a software solution of AWS that allows you to remotely provision software code and device configuration on IoT devices. At the time there are three ways to use Greengrass: from the [AWS Management Console](https://console.aws.amazon.com/iot/home#/greengrassIntro), programmatically from one of the [AWS SDKs](https://aws.amazon.com/tools/#sdk) or by using [AWS Command Line Interface](https://aws.amazon.com/cli/) (CLI). The first method works well for prototyping but does not allow you to create a reliable, reproducible, production ready deployment pipeline. The second and the third method are extremely tedious and error prone considering the complexity of the [Greengrass data model](https://read.acloud.guru/aws-greengrass-the-missing-manual-2ac8df2fbdf4#ad8d). The standard way to create cloud infrastructure in a reproducible, testable and automatic way on AWS infrastructure is to use [CloudFormation](https://aws.amazon.com/cloudformation/) templates. Unfortunately at the time there is no support for Greengrass resources in CloudFormation. GrassFormation aims to remedy this shortcoming.
 
 GrassFormation is a collection of [AWS lambda](https://aws.amazon.com/lambda/) functions and a CloudFormation [transform macro](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html) that allows you to deploy resources with CloudFormation that are otherwise not supported. After installing GrassFormation you can provision for example a Greengrass Group together with your other resources from a CloudFormation template as simple as:
 
@@ -30,13 +30,19 @@ For more examples see the [examples](examples) folder.
 
 ## Installing
 
+### Prerequisites
+
+You will need an [AWS Account](https://aws.amazon.com).
+
 ### Automatic installation
 
 A packaged CloudFormation template is provided for you for easy, on-click installation of GrassFormation. This is the recommended method. This template will install some lambda functions to handle Greengrass resources creation requests, and the macro definition to easily integrate the resources into your stack. When you are ready, click on the button bellow:
 
-[![Install GrassFormation to your account](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GrassFormation&templateURL=https://s3.amazonaws.com/sam-packages.neosperience.com/GrassFormation/template.yaml)
+[![Install GrassFormation to your AWS account](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=GrassFormation&templateURL=https://s3.amazonaws.com/sam-packages.neosperience.com/GrassFormation/template.yaml)
 
-On the CloudFormation Management Console click three times "Next", acknowledge the creation of the IAM role (they are the lambda function execution roles) and finally "Create". When the stack finished the deployment you can start writing CloudFormation stacks that deploy Greengrass resources. An example template is provided in the `examples/fullgrass.yaml` file.
+On the CloudFormation Management Console click three times "Next", acknowledge the creation of the IAM role (they are the lambda function execution roles) and finally "Create". When the stack finished the deployment you can start writing CloudFormation stacks that deploy Greengrass resources.
+
+This template installs exclusively pay per use lambda resources on your account. AWS provides a generous [free tier](https://aws.amazon.com/free/) and generally low cost for lambda functions.
 
 ### Manual installation
 
@@ -53,33 +59,7 @@ A Makefile is provided for your convenience. To deploy the stack with make you s
 $ make deploy SAM_S3_BUCKET=my-bucket AWS_DEFAULT_REGION=eu-west-1
 ```
 
-Now you can start writing CloudFormation stacks that deploy Greengrass resources. An example template is provided in the `examples/fullgrass.yaml` file.
-
-## Deploying the sample CloudFormation stack
-
-Pick up `examples/fullgrass.yaml` and head to the [CloudFormation management console](https://console.aws.amazon.com/cloudformation/home). Select "Create Stack" and upload the template file to S3. You will have to fill out the following stack parameters:
-
- - `CSRParameter`: A Certificate Signing Request, created along with the certificates that you will deploy on your Greengrass Core. For more information check the [AWS IoT Documentation](https://docs.aws.amazon.com/iot/latest/apireference/API_CreateCertificateFromCsr.html). It should have the following format:
-
-```
------BEGIN CERTIFICATE REQUEST-----
-[base64 encoded certificate request]
------END CERTIFICATE REQUEST-----
-```
-
- - `GroupNameParameter`: The name of the Greengrass Group.
-
-The sample stack comes with a lambda function that will be deployed to the Greengrass Core device. The stack configures access to a simple hardware device (in this case `/dev/random`) and the lambda function shows you how to access this device. Two environment variables: `AWS_DEFAULT_REGION` and `HELLO` are also configured from the stack and accessed from the lambda. The lambda is running indefinitely and it periodically sends a random number picked up from `/dev/random` to CloudWatch and local file system logs so you can test the logger configuration.
-
-## Deleting the sample CloudFormation stack
-
-There is one glitch when you want to delete the sample CloudFormation stack. The `AWS::IoT::Certificate` type resource named `CoreCert` is left in `ACTIVATE` state after the deployment of the stack. This is necessary for the Greengrass Core to work. However this resource can not be deleted until it is not deactivated. So before starting the deletion of the stack you should deactivate it manually. Pick up the Physical ID of the `CoreCert` resource: you can find it under the "Resources" section of the details page of your deployed CloudFormation stack. Then call this command of the aws cli:
-
-```shell
-aws iot update-certificate --certificate-id [Physical ID from CF] --new-status INACTIVE
-```
-
-Now you can delete the deployed stack.
+Now you can start writing CloudFormation stacks that deploy Greengrass resources. Examples are provided in the [examples](examples) folder.
 
 ## Usage
 

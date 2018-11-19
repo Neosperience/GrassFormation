@@ -1,5 +1,6 @@
 project_name = GrassFormation
 AWS_DEFAULT_REGION := $(if $(AWS_DEFAULT_REGION),$(AWS_DEFAULT_REGION),"us-east-1")
+PUBLIC = true
 
 src_dir = grassformation
 dist_dir = dist
@@ -9,6 +10,10 @@ stack_name = $(project_name)
 
 dist_files = $(patsubst $(src_dir)/%.py,$(dist_dir)/%.py,$(src_files))
 dist_req = $(dist_dir)/Pipenv
+
+ifeq ($(PUBLIC), true)
+	TEMPLATE_ACL=--acl public-read
+endif
 
 all: help
 
@@ -93,8 +98,13 @@ packaged-template.yaml: sam-template.yaml $(dist_dir)/.dist | $(dist_dir)/.$(SAM
 		--s3-bucket $(SAM_S3_BUCKET) \
 		--s3-prefix $(s3_prefix)
 	@echo "[*] Distribution package uploaded to s3://$(SAM_S3_BUCKET)/$(s3_prefix)/ folder"
+	@if [ $(PUBLIC) == "true" ]; then \
+		export PACKAGE_KEY=`sed -n 's/^[[:space:]]*S3Key: //p' packaged-template.yaml | head -1`; \
+		echo "[+] Setting public read access on s3:/$(SAM_S3_BUCKET)/$$PACKAGE_KEY ..."; \
+		aws s3api put-object-acl --bucket $(SAM_S3_BUCKET) --key $$PACKAGE_KEY $(TEMPLATE_ACL); \
+	fi;
 	@echo "[+] Uploading the packaged CloudFormation template..."
-	aws s3 cp packaged-template.yaml s3://$(SAM_S3_BUCKET)/$(s3_prefix)/template.yaml
+	aws s3 cp packaged-template.yaml s3://$(SAM_S3_BUCKET)/$(s3_prefix)/template.yaml $(TEMPLATE_ACL)
 	@echo "[*] CloudFormation template uploaded to s3://$(SAM_S3_BUCKET)/$(s3_prefix)/template.yaml"
 
 #:    deploy           : Deploys or updates the service with CloudFormation

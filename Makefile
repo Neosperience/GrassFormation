@@ -46,7 +46,9 @@ $(dist_files): | $(dist_dir)
 
 $(dist_req): Pipfile | $(dist_dir)
 	$(info [+] Launching docker to install python requirements...)
-	docker run -v $$PWD:/var/task -it lambci/lambda:build-python3.6 /bin/bash -c 'make _package'
+	docker run -v $$PWD:/var/task \
+		-it lambci/lambda:build-python3.6 /bin/bash \
+		-c 'make _package SAM_S3_BUCKET=$(SAM_S3_BUCKET) AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION)'
 
 .PHONY: _package
 _package:

@@ -81,9 +81,13 @@ ifeq ($(SAM_S3_BUCKET),)
 $(error SAM_S3_BUCKET variable is not set. Set it as environment variable or as command line argument.)
 endif
 	@echo ""
-	@echo "Creating s3 bucket..."
-	aws s3 mb s3://$(SAM_S3_BUCKET)
-	touch $@
+	@if aws s3 ls "s3://$(SAM_S3_BUCKET)" 2>&1 | grep -q 'NoSuchBucket'; then \
+		@echo "[*] Creating s3 bucket $(SAM_S3_BUCKET)..." \
+		aws s3 mb s3://$(SAM_S3_BUCKET) --region $(AWS_DEFAULT_REGION); \
+	else; \
+		@echo "[+] S3 bucket $(SAM_S3_BUCKET) already exists." \
+	fi;
+	@touch $@
 
 packaged-template.yaml: sam-template.yaml $(dist_dir)/.dist | $(dist_dir)/.$(SAM_S3_BUCKET)
 	@echo "[+] Packing and uploading distribution package..."

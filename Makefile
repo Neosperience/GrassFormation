@@ -52,13 +52,6 @@ $(dist_req): Pipfile | $(dist_dir)
 
 .PHONY: _package
 _package:
-	$(info [+] Installing python requirements...)
-	pip install pipenv
-	pipenv lock -r > requirements.txt
-	pipenv run pip install \
-		--isolated \
-		--disable-pip-version-check \
-		-Ur requirements.txt -t $(dist_dir)
 	$(info [*] Cleaning eventual cache files)
 	find $(dist_dir) -name '*~' -exec rm -f {} +
 	find $(dist_dir) -name '__pycache__' -exec rm -rf {} +
